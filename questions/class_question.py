@@ -18,6 +18,13 @@ class Questions:
         return "Ваша справка готовится"
 
     @staticmethod
+    def department__get_department_ground() -> str:
+        """ Создает справку для пользователя """
+        print('кабинет получен')
+
+        return "511д"
+
+    @staticmethod
     def references__get_status_references() -> str:
 
         """ Возвращает статус справки """
