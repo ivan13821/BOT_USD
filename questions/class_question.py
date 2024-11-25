@@ -19,7 +19,7 @@ class Questions:
 
     @staticmethod
     def department__get_department_ground() -> str:
-        """ Создает справку для пользователя """
+        """ Возвращает кабинет кафедры """
         print('кабинет получен')
 
         return "511д"
