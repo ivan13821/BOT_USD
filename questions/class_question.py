@@ -27,7 +27,7 @@ class Questions:
     @staticmethod
     def references__get_status_references() -> str:
 
-        """ Возвращает статус справки """
+        """ Возвращает статус справки str """
 
         print('Справка готовится')
 
