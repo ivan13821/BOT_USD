@@ -41,7 +41,7 @@ async def start(message: types.Message, state: FSMContext):
 @router.callback_query(StateFilter(None))
 async def generate_keyboard(call: types.CallbackQuery, state: FSMContext):
 
-    """ поиск по введенным ключевым словам """
+    """ пользователь ходит по списку вопросов """
 
     key = call.data
 

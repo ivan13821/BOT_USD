@@ -6,14 +6,14 @@ def test():
     print('test')
     return 'testing...'
 
-#(text, callback)
+#(text, callback, comment)
 questions = {
-    ('Справки', 'references'): {
-        ('Получить справку', 'references/get_references'): Questions.references__get_references,
-        ('Посмотреть статус справки', 'references/get_status_references'): test
+    ('Справки', 'references', "справку, Справка"): {
+        ('Получить справку', 'references/get_references', "Взять справку"): Questions.references__get_references,
+        ('Посмотреть статус справки', 'references/get_status_references', "Когда будет готова справка, статус справки"): test
     },
-    ('Кафедра', "department"): {
-        ("Кафедра землеустройства", "department/ground"): Questions.department__get_department_ground
+    ('Кафедра', "department", "кафедры, Кафедру"): {
+        ("Кафедра землеустройства", "department/ground", "кафедру"): Questions.department__get_department_ground
     }
 }
 
