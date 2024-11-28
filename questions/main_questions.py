@@ -22,7 +22,6 @@ end_func = {
     "department/social": (Questions.department__get_department_social, "Кафедра социалогии"),
     "department/math": (Questions.department__get_department_math, "Кафедра математики"),
     "department/info": (Questions.department__get_department_info, "Кафедра информатики"),
-
 }
 
 
