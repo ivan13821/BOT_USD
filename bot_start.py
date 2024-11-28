@@ -7,6 +7,7 @@ from config import get_tg_api_token
 #Импорт модулей бота
 from standart_questions import main_standart
 from other import other_main
+from keywords_questions import main as keywords_main
 
 
 async def main():
@@ -14,7 +15,7 @@ async def main():
 
     dp = Dispatcher()
 
-    dp.include_routers(other_main.router, main_standart.router)
+    dp.include_routers(other_main.router, main_standart.router, keywords_main.router)
     
     dp.callback_query.outer_middleware(StopSpamMiddleware())
     dp.message.outer_middleware(StopSpamMiddleware())

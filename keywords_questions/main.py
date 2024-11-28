@@ -4,15 +4,16 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
+from aiogram.types import ReplyKeyboardMarkup
 
 from config import get_tg_api_token, get_feedback_chat_id
 
 #импорт модулей проекта
-from clear_question.main_clear import Clear
+from keywords_questions.easy_questions.main import EasyQuestions
 
 #импорт клавиатуры
 from other.other_keyboard import OtherKeyboardFactory
-from questions.main_questions import Questions
+from keyboard_factory.keyboard_factory_main import KeyBoardFactory
 
 router = Router()
 
@@ -28,11 +29,16 @@ async def search_keywords(message: types.Message, state:FSMContext):
 
     """ поиск по введенным ключевым словам """
 
-    text = Clear.clear(message.text)
+    text = message.text
 
-    answer = Questions.genereta_answer(text)
+    answer = EasyQuestions.generate_easy_answer(text)
 
-    await message.answer(answer)
+    if answer == []:
+        return await message.answer('Попробуйте перефразировать свой вопрос')
+
+    answer = KeyBoardFactory.create_inline_keyboard(answer)
+
+    await message.answer('Выберете то что вам подходит больше всего:', reply_markup=answer)
 
 
 

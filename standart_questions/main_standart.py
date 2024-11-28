@@ -54,7 +54,7 @@ async def generate_keyboard(call: types.CallbackQuery, state: FSMContext):
     if not func:
         await bot.send_message(call.message.chat.id ,'Выберите действие:', reply_markup=reply_markup)
     else:
-        answer = func()
+        answer = func[0]()
         await bot.send_message(call.message.chat.id, answer, reply_markup=reply_markup)
 
     await bot.delete_message(call.message.chat.id, call.message.message_id)
