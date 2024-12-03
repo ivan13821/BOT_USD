@@ -6,7 +6,7 @@ from Levenshtein import ratio
 
 
 
-db = Database()
+db = Database('easy answer')
 
 
 

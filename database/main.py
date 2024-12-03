@@ -7,19 +7,19 @@ class Database:
 
 
     # подключение и создание бд ------------------------------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, modyl_name):
         self.conn = None
         self.cur = None
-        self.connect_to_db()
+        self.connect_to_db(modyl_name)
 
-    def connect_to_db(self):
+    def connect_to_db(self, modyl_name):
         params = get_db_params()
         print('Подключаюсь к PostgreSQL...')
         try:
             self.conn = psycopg2.connect(**params)
             self.conn.autocommit = True
             self.cur = self.conn.cursor()
-            print('Успешно подключен к PostgreSQL!')
+            print(f'Успешно подключен для работы с {modyl_name}')
             self.create_tables_if_they_do_not_exists()
             self.create_table_admins_if_not_exists()
         except Exception as error:

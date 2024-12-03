@@ -24,7 +24,7 @@ router = Router()
 bot = Bot(token=get_tg_api_token())
 
 
-db = Database()
+db = Database('admins')
 
 
 
