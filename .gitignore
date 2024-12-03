@@ -6,7 +6,7 @@ __pycache__/
 venv/
 .idea/
 **__init__.py
-config.ini
+**config.ini
 
 # C extensions
 *.so
