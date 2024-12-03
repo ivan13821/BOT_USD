@@ -1,11 +1,12 @@
 from questions.main_questions import questions, end_func
 from keyboard_factory.keyboard_factory_main import KeyBoardFactory
+from database.main import Database
 
 from Levenshtein import ratio
 
 
 
-
+db = Database()
 
 
 
@@ -22,41 +23,80 @@ class EasyQuestions:
 
         text = EasyQuestions.clear_answer(text)
 
-        answers = {}
+        #ограничения id
+        start = 0
+        end = 100
+        need = db.select_max_id_question()[0][0]
 
+        #для ответов 
+        result = {}
+        maxi = 1
 
-        #ищем кореляцию между вопросом юзера и вопросом с коментарием в системе
-        for i in end_func.items():
-            key, value = i
-            func, question = value
+        while True:
 
-            #если между вопросом пользователя и вопросом в системе полное совпадение, то отправляем ответ сразу
-            if EasyQuestions.complete_coincidence(text, question): 
-                #return [KeyBoardFactory.create_inline_keyboard([[f"{question}:-){key}"]])]
-                return [[f"{question}:-){key}"]]
+            questions = db.select_questions(start_id=start, end_id=end)
+
+            if questions == []:
+                break
+
+            for id, key_words, answer in questions:
+                if EasyQuestions.complete_coincidence(text, key_words): 
+                    return [[f"{key_words}:-){id}"]]
+                
+
+                let = EasyQuestions.partial_match(key_words, text)
+
+                if let > maxi:
+                    result = {}
+                    result[f"{key_words}:-){id}"] = let
+                elif let >= maxi:
+                    result[f"{key_words}:-){id}"] = let
+
             
 
-            #Если совпадение слов в пердложении больше 0 то добавлем это в ответ
-            let = EasyQuestions.partial_match(question, text)
-            if let >= 1:
-                answers[f"{question}:-){key}"] = let
+            if end > need:
+                break
+            else:
+                start += 100
+                end += 100
+        
+        answer = list(map(lambda x: [x], list(result.keys())))
+        return answer
+
+
+
+        # #ищем кореляцию между вопросом юзера и вопросом с коментарием в системе
+        # for i in end_func.items():
+        #     key, value = i
+        #     func, question = value
+
+        #     #если между вопросом пользователя и вопросом в системе полное совпадение, то отправляем ответ сразу
+        #     if EasyQuestions.complete_coincidence(text, question): 
+        #         #return [KeyBoardFactory.create_inline_keyboard([[f"{question}:-){key}"]])]
+        #         return [[f"{question}:-){key}"]]
+            
+
+        #     #Если совпадение слов в пердложении больше 0 то добавлем это в ответ
+        #     let = EasyQuestions.partial_match(question, text)
+        #     if let >= 1:
+        #         answers[f"{question}:-){key}"] = let
             
         
 
-        #Ищем элементы с максимальной кореляцией
-        result = []
-        maxi = 0
-        for i in answers.keys():
-            if answers[i] > maxi:
-                result = []
-                maxi = answers[i]
-                result.append([i])
+        # #Ищем элементы с максимальной кореляцией
+        # result = []
+        # maxi = 0
+        # for i in answers.keys():
+        #     if answers[i] > maxi:
+        #         result = []
+        #         maxi = answers[i]
+        #         result.append([i])
             
-            elif answers[i] == maxi:
-                result.append([i])
+        #     elif answers[i] == maxi:
+        #         result.append([i])
         
 
-        return result
+        # return result
 
 
 

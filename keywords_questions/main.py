@@ -10,6 +10,7 @@ from config import get_tg_api_token, get_feedback_chat_id
 
 #импорт модулей проекта
 from keywords_questions.easy_questions.main import EasyQuestions
+from database.main import Database
 
 #импорт клавиатуры
 from other.other_keyboard import OtherKeyboardFactory
@@ -19,7 +20,7 @@ router = Router()
 
 bot = Bot(token=get_tg_api_token())
 
-
+db = Database()
 
 
 
@@ -49,7 +50,21 @@ async def search_keywords(message: types.Message, state:FSMContext):
 
 
 
+@router.callback_query(StateFilter(None))
+async def generate_keyboard(call: types.CallbackQuery, state: FSMContext):
 
+    """ пользователь ходит по списку вопросов """
+
+    key = call.data
+
+    func = db.select_question_where_id(key)
+
+
+
+    answer = func[0][1]
+    await bot.send_message(call.message.chat.id, answer)
+
+    await bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
 

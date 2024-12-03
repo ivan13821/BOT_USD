@@ -4,7 +4,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import ReplyKeyboardMarkup
+from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove
 
 
 from config import get_tg_api_token, get_feedback_chat_id
@@ -13,7 +13,7 @@ from config import get_tg_api_token, get_feedback_chat_id
 #импорт модулей проекта
 from keywords_questions.easy_questions.main import EasyQuestions
 from database.main import Database
-
+from for_admin.keyboards import ForAdminKeyboard
 
 #импорт клавиатуры
 from other.other_keyboard import OtherKeyboardFactory
@@ -40,6 +40,7 @@ class AdminsStates(StatesGroup):
     admin_input_chat_id_drop_admin = State()
     add_question = State()
     drop_question = State()
+    update_question = State()
 
 
 
@@ -77,14 +78,14 @@ async def add_admin(message: types.Message, state:FSMContext):
 
     status = db.select_admin_status(message.chat.id)
 
-    try:
-        if status[0][0] != 'admin':
-            return await message.answer("У вас недостаточно прав для совершения данной операции")
-    except KeyError:
+    if status == []:
+        return await message.answer("У вас недостаточно прав для совершения данной операции")
+    
+    if status[0][0] != 'admin':
         return await message.answer("У вас недостаточно прав для совершения данной операции")
 
 
-    await message.answer("Введите пожалуйста id чата и роль (editor или admin) через запятую\nУзнать это можно с помощью команды /chat")
+    await message.answer("Введите пожалуйста id чата и роль (editor или admin) через запятую\nУзнать это можно с помощью команды /chat", reply_markup=ForAdminKeyboard.back())
 
     await state.set_state(AdminsStates.admin_input_message_chat_id)
 
@@ -103,6 +104,10 @@ async def add_admin(message: types.Message, state:FSMContext):
 
     """ Админ вводит чат id и роль"""
 
+    if message.text == 'Назад': 
+        await message.answer("Действие отменено", reply_markup=ReplyKeyboardRemove())
+        return await state.clear()
+
     text = message.text
     text = list(map(lambda x: x.strip(), text.split(',')))
 
@@ -115,9 +120,10 @@ async def add_admin(message: types.Message, state:FSMContext):
     if not text[0].isdigit():
         return await message.answer(f"К сожалению id {text[0]} не может существовать")
     
-    result = db.insert_into_admins(text[0], text[1])
+    result = db.insert_into_admins(int(text[0]), text[1])
 
-    await message.answer(result)
+
+    await message.answer(result, reply_markup=ReplyKeyboardRemove())
     await state.clear()
 
 
@@ -181,14 +187,15 @@ async def add_admin(message: types.Message, state:FSMContext):
 
     status = db.select_admin_status(message.chat.id)
 
-    try:
-        if status[0][0] != 'admin':
-            return await message.answer("У вас недостаточно прав для совершения данной операции")
-    except KeyError:
+    if status != []:
+        return await message.answer("У вас недостаточно прав для совершения данной операции")
+    
+    if status[0][0] != 'admin':
         return await message.answer("У вас недостаточно прав для совершения данной операции")
 
 
-    await message.answer("Введите пожалуйста id чата админа\nЧтобы узнать id админов введите /show_admins")
+
+    await message.answer("Введите пожалуйста id чата админа\nЧтобы узнать id админов введите /show_admins", reply_markup=ForAdminKeyboard.back())
 
     await state.set_state(AdminsStates.admin_input_chat_id_drop_admin)
 
@@ -203,6 +210,10 @@ async def add_admin(message: types.Message, state:FSMContext):
 
     """ Получение id админа """
 
+    if message.text == 'Назад': 
+        await message.answer("Действие отменено", reply_markup=ReplyKeyboardRemove())
+        return await state.clear()
+
     admin_id = message.text
 
     if not admin_id.isdigit():
@@ -216,7 +227,7 @@ async def add_admin(message: types.Message, state:FSMContext):
     except KeyError:
         return await message.answer("Такого админа не существует")
     
-    await message.answer("админ удален")
+    await message.answer("админ удален", reply_markup=ReplyKeyboardRemove())
     await state.clear()
     
 
@@ -242,14 +253,11 @@ async def add_admin(message: types.Message, state:FSMContext):
 
     status = db.select_admin_status(message.chat.id)
 
-    try:
-        if status[0][0] not in ['admin', 'editor']:
-            return await message.answer("У вас недостаточно прав для совершения данной операции")
-    except KeyError:
+    if status == []:
         return await message.answer("У вас недостаточно прав для совершения данной операции")
 
 
-    await message.answer("Введите пожалуйста ключевые слова, а через знак ; введите ответ на эту комбинацию ключевых слов")
+    await message.answer("Введите пожалуйста ключевые слова, а через знак ; введите ответ на эту комбинацию ключевых слов", reply_markup=ForAdminKeyboard.back())
 
     await state.set_state(AdminsStates.add_question)
 
@@ -266,6 +274,9 @@ async def add_admin(message: types.Message, state:FSMContext):
 
     text = list(map(lambda x: x.lower().strip(), message.text.split(';')))
 
+    if message.text == 'Назад': 
+        await message.answer("Действие отменено", reply_markup=ReplyKeyboardRemove())
+        return await state.clear()
     if len(text) != 2:
         return await message.answer("Введите пожалуйста ключевые слова, а через знак ; введите ответ на эту комбинацию ключевых слов")
     
@@ -281,12 +292,12 @@ async def add_admin(message: types.Message, state:FSMContext):
             answers.append(i)
     answers = ''.join(answers)
 
-    if db.select_question_where_key_words(words) == []:
+    if (x:=db.select_question_where_key_words(words)) != []:
         return await message.answer("Вопрос с такими ключевыми словами уже создан, попробуйте его уточнить")
         
     answer = db.insert_question(words, answers)
 
-    await message.answer(answer)
+    await message.answer(answer, reply_markup=ReplyKeyboardRemove())
     await state.clear()
 
     
@@ -300,11 +311,9 @@ async def add_admin(message: types.Message, state:FSMContext):
 
     status = db.select_admin_status(message.chat.id)
 
-    try:
-        if status[0][0] not in ['admin', 'editor']:
-            return await message.answer("У вас недостаточно прав для совершения данной операции")
-    except KeyError:
+    if status == []:
         return await message.answer("У вас недостаточно прав для совершения данной операции")
+
 
     result = db.select_questions()
 
@@ -313,12 +322,73 @@ async def add_admin(message: types.Message, state:FSMContext):
     if result == []:
         return await message.answer("К сожалению вопросов еще не добавленно")
 
-    k = 1
-    for key_words, answers in result:
-        answer += f"{k}) {key_words}: {answers}\n"
-        k += 1
+
+    for quest_id, key_words, answers in result:
+        answer += f"{quest_id}) {key_words}: {answers}\n"
+
     
     await message.answer(answer)
+
+
+
+#
+#
+#обновление вопросов ------------------------------------------------------------------------------------------------------------------------------------------------------
+#
+#
+
+
+
+
+
+
+
+@router.message(F.text == "/update_question")
+async def add_admin(message: types.Message, state:FSMContext):
+
+    """ Обновление вопроса """
+
+    status = db.select_admin_status(message.chat.id)
+
+    if status == []:
+        return await message.answer("У вас недостаточно прав для совершения данной операции")
+
+
+    await message.answer("Введите пожалуйста id вопроса", reply_markup=ForAdminKeyboard.back())
+
+    await state.set_state(AdminsStates.update_question)
+
+
+
+
+
+
+
+
+
+@router.message(AdminsStates.update_question)
+async def add_admin(message: types.Message, state:FSMContext):
+
+    """ Удаление вопроса """
+
+    if message.text == 'Назад': 
+        await message.answer("Действие отменено", reply_markup=ReplyKeyboardRemove())
+        return await state.clear()
+
+    if db.select_question_where_id(message.text) == []:
+        return await message.answer("Вопроса с такими ключевыми словами не существует")
+    
+    db.delete_question(id_question=message.text)
+
+
+    await message.answer("Введите пожалуйста ключевые слова, а через знак ; введите ответ на эту комбинацию ключевых слов")
+
+    await state.set_state(AdminsStates.add_question)
+
+
+
+
+
 
 
 
@@ -340,14 +410,11 @@ async def add_admin(message: types.Message, state:FSMContext):
 
     status = db.select_admin_status(message.chat.id)
 
-    try:
-        if status[0][0] not in ['admin', 'editor']:
-            return await message.answer("У вас недостаточно прав для совершения данной операции")
-    except KeyError:
+    if status == []:
         return await message.answer("У вас недостаточно прав для совершения данной операции")
 
 
-    await message.answer("Введите пожалуйста ключевые слова вопроса")
+    await message.answer("Введите пожалуйста id вопроса", reply_markup=ForAdminKeyboard.back())
 
     await state.set_state(AdminsStates.drop_question)
 
@@ -359,13 +426,20 @@ async def add_admin(message: types.Message, state:FSMContext):
 
     """ Удаление вопроса """
 
-    if db.select_question_where_key_words(message.text) == []:
+    if message.text == 'Назад': 
+        await message.answer("Действие отменено", reply_markup=ReplyKeyboardRemove())
+        return await state.clear()
+
+    if not message.text.isdigit():
+        return await message.answer("id должен состоять из цифр")
+
+    if db.select_question_where_id(message.text) == []:
         return await message.answer("Вопроса с такими ключевыми словами не существует")
     
-    db.delete_question(key_words=message.text)
+    db.delete_question(id_question=message.text)
 
 
-    await message.answer("Вопрос успешно удален")
+    await message.answer("Вопрос успешно удален", reply_markup=ReplyKeyboardRemove())
     await state.clear()
 
 
@@ -376,12 +450,53 @@ async def add_admin(message: types.Message, state:FSMContext):
 
 
 
-#удалить
-@router.message(F.text == "/test")
+
+
+
+
+
+# other ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+@router.message(F.text == "/q")
 async def add_admin(message: types.Message, state:FSMContext):
 
-    print(db.insert_into_admins(message.chat.id, "admin"))
+    """ Показать команды связанные с вопросами """
+
+    status = db.select_admin_status(message.chat.id)
+
+    if status == []:
+        return await message.answer("У вас недостаточно прав для совершения данной операции")
+
+    question_command = ["/show_questions - показать вопросы", "/add_question - добавить вопрос", "/update_question - обновить вопрос", "/drop_question - удалить вопрос"]
+
+    answer = '\n\n'.join(question_command)
+
+    await message.answer(answer)
 
 
 
 
+
+
+
+
+
+@router.message(F.text == "/a")
+async def add_admin(message: types.Message, state:FSMContext):
+
+    """ Показать команды связанные с админами """
+
+    status = db.select_admin_status(message.chat.id)
+
+    if status == []:
+        return await message.answer("У вас недостаточно прав для совершения данной операции")
+
+    question_command = ["/chat - показать id", "/show_admins - показать админов", "/add_admin - добавить админа", "/drop_admin - удалить админа"]
+
+    answer = '\n\n'.join(question_command)
+
+    await message.answer(answer)

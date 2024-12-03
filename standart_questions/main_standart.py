@@ -24,40 +24,40 @@ bot = Bot(token=get_tg_api_token())
 
 
 
-@router.message(F.text == "/start")
-async def start(message: types.Message, state: FSMContext):
+# @router.message(F.text == "/start")
+# async def start(message: types.Message, state: FSMContext):
 
-    """ начинает опрос пользователя """
+#     """ начинает опрос пользователя """
 
-    reply_markup = KeyboardQuestions.generate_keyboard(key='')
+#     reply_markup = KeyboardQuestions.generate_keyboard(key='')
 
-    await bot.send_message(message.chat.id, 'Выберите действие:', reply_markup=reply_markup)
-
-
+#     await bot.send_message(message.chat.id, 'Выберите действие:', reply_markup=reply_markup)
 
 
 
 
-@router.callback_query(StateFilter(None))
-async def generate_keyboard(call: types.CallbackQuery, state: FSMContext):
-
-    """ пользователь ходит по списку вопросов """
-
-    key = call.data
-
-    func = KeyboardQuestions.is_it_func(key)
 
 
+# @router.callback_query(StateFilter(None))
+# async def generate_keyboard(call: types.CallbackQuery, state: FSMContext):
 
-    reply_markup = KeyboardQuestions.generate_keyboard(key=key)
+#     """ пользователь ходит по списку вопросов """
 
-    if not func:
-        await bot.send_message(call.message.chat.id ,'Выберите действие:', reply_markup=reply_markup)
-    else:
-        answer = func[0]()
-        await bot.send_message(call.message.chat.id, answer, reply_markup=reply_markup)
+#     key = call.data
 
-    await bot.delete_message(call.message.chat.id, call.message.message_id)
+#     func = KeyboardQuestions.gte(key)
+
+
+
+#     reply_markup = KeyboardQuestions.generate_keyboard(key=key)
+
+#     if not func:
+#         await bot.send_message(call.message.chat.id ,'Выберите действие:', reply_markup=reply_markup)
+#     else:
+#         answer = func[0]()
+#         await bot.send_message(call.message.chat.id, answer, reply_markup=reply_markup)
+
+#     await bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
 

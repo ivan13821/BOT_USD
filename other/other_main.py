@@ -16,10 +16,10 @@ bot = Bot(token=get_tg_api_token())
 
 
 
-@router.message(F.text == '/help')
-async def help(message: types.Message, state: FSMContext):
+# @router.message(F.text == '/help')
+# async def help(message: types.Message, state: FSMContext):
 
-    """ Помощь пользователю """
+#     """ Помощь пользователю """
 
-    await message.answer('Помоги себе сам')
+#     await message.answer('Помоги себе сам')
 

@@ -68,6 +68,8 @@ class Database:
         """ Возвращает максимальный по id элемент базы данных """
 
         self.execute_query(f"""SELECT MAX(id_question) FROM questions""")
+
+        return self.cur.fetchall()
     
 
 
@@ -126,7 +128,7 @@ class Database:
 
     def select_questions(self, start_id: int = 0, end_id: int = 100):
 
-        self.execute_query(f"""SELECT key_words, answer FROM questions 
+        self.execute_query(f"""SELECT id_question, key_words, answer FROM questions 
                            WHERE id_question BETWEEN {start_id} AND {end_id}
                            LIMIT 100""")
 
@@ -144,11 +146,19 @@ class Database:
         return self.cur.fetchall()
     
 
+    def select_question_where_id(self, quest_id):
+
+        self.execute_query(f"""SELECT key_words, answer FROM questions 
+                           WHERE id_question='{quest_id}'""")
+
+        return self.cur.fetchall()
+    
 
 
-    def delete_question(self, key_words):
 
-        self.execute_query(f"""DELETE FROM questions WHERE key_words='{key_words}'""")
+    def delete_question(self, id_question):
+
+        self.execute_query(f"""DELETE FROM questions WHERE id_question='{id_question}'""")
 
 
 
