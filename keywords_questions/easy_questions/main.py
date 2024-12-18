@@ -46,9 +46,11 @@ class EasyQuestions:
 
                 let = EasyQuestions.partial_match(key_words, text)
 
+
                 if let > maxi:
                     result = {}
                     result[f"{button_text}:-){id}"] = let
+                    maxi = let
                 elif let >= maxi:
                     result[f"{button_text}:-){id}"] = let
 
