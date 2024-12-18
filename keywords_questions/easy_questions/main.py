@@ -36,8 +36,6 @@ class EasyQuestions:
 
             questions = db.select_questions(start_id=start, end_id=end)
 
-            print(questions)
-
             if questions == []:
                 break
 
