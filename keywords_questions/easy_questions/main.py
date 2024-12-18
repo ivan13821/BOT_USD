@@ -36,21 +36,23 @@ class EasyQuestions:
 
             questions = db.select_questions(start_id=start, end_id=end)
 
+            print(questions)
+
             if questions == []:
                 break
 
-            for id, key_words, answer in questions:
+            for id, button_text, key_words, answer in questions:
                 if EasyQuestions.complete_coincidence(text, key_words): 
-                    return [[f"{key_words}:-){id}"]]
+                    return [[f"{button_text}:-){id}"]]
                 
 
                 let = EasyQuestions.partial_match(key_words, text)
 
                 if let > maxi:
                     result = {}
-                    result[f"{key_words}:-){id}"] = let
+                    result[f"{button_text}:-){id}"] = let
                 elif let >= maxi:
-                    result[f"{key_words}:-){id}"] = let
+                    result[f"{button_text}:-){id}"] = let
 
             
 

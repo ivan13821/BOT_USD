@@ -4,7 +4,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import ReplyKeyboardMarkup
+from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove
 
 from config import get_tg_api_token, get_feedback_chat_id
 
@@ -21,8 +21,6 @@ router = Router()
 bot = Bot(token=get_tg_api_token())
 
 db = Database()
-
-
 
 
 @router.message()
@@ -65,8 +63,6 @@ async def generate_keyboard(call: types.CallbackQuery, state: FSMContext):
     await bot.send_message(call.message.chat.id, answer)
 
     await bot.delete_message(call.message.chat.id, call.message.message_id)
-
-
 
 
 

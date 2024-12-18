@@ -44,8 +44,9 @@ class Database:
     def create_tables_if_they_do_not_exists(self):
         self.execute_query("""CREATE TABLE IF NOT EXISTS questions (
                                 id_question serial primary key,
-                                key_words VARCHAR(100),
-                                answer VARCHAR(500)
+                                button_text text,
+                                key_words text,
+                                answer text
                                 );""")
     
 
@@ -128,7 +129,7 @@ class Database:
 
     def select_questions(self, start_id: int = 0, end_id: int = 100):
 
-        self.execute_query(f"""SELECT id_question, key_words, answer FROM questions 
+        self.execute_query(f"""SELECT id_question, button_text, key_words, answer FROM questions 
                            WHERE id_question BETWEEN {start_id} AND {end_id}
                            LIMIT 100""")
 
