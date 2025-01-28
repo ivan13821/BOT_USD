@@ -1,4 +1,4 @@
-from questions.main_questions import questions, end_func
+# from questions.main_questions import questions, end_func
 from keyboard_factory.keyboard_factory_main import KeyBoardFactory
 from database.main import Database
 

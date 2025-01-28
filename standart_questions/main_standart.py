@@ -8,11 +8,11 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 
 from config import get_tg_api_token, get_feedback_chat_id
-from questions.class_question import Questions
+# from questions.class_question import Questions
 
-#импорт модулей проекта
-from questions.questions_keyboards import KeyboardQuestions
-from questions.main_questions import questions
+# #импорт модулей проекта
+# from questions.questions_keyboards import KeyboardQuestions
+# from questions.main_questions import questions
 
 router = Router()
 

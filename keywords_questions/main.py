@@ -34,10 +34,16 @@ async def search_keywords(message: types.Message, state:FSMContext):
 
     if answer == []:
         return await message.answer('Попробуйте перефразировать свой вопрос')
-
-    answer = KeyBoardFactory.create_inline_keyboard(answer)
-
-    await message.answer('Выберете то что вам подходит больше всего:', reply_markup=answer)
+    
+    #если ответ один, то отправляем просто сообщение с ответом
+    if len(answer) == 1:
+        answer = db.select_question_where_id(answer[0][0].split(':-)')[1])[0][1]
+        await message.answer(answer)
+    
+    #если возможных ответов несколько
+    else:
+        answer = KeyBoardFactory.create_inline_keyboard(answer)
+        await message.answer('Выберете то что вам подходит больше всего:', reply_markup=answer)
 
 
 

@@ -31,14 +31,14 @@ WORKDIR /
 
 RUN apt update
 
-COPY requirements.txt requirements.txt
-COPY game_for_economists/ game_for_economists/
-COPY keyboard_factory/ keyboard_factory/
-COPY other/ other/
-COPY config.ini config.ini
-COPY StopSpamMidleware.py StopSpamMidleware.py
-COPY config.py config.py 
-COPY bot_start.py bot_start.py
+COPY requirements.txt /requirements.txt
+COPY game_for_economists/. /game_for_economists/
+COPY keyboard_factory/. /keyboard_factory/
+COPY other/. /other/
+COPY config.ini /config.ini
+COPY StopSpamMidleware.py /StopSpamMidleware.py
+COPY config.py /config.py 
+COPY bot_start.py /bot_start.py
 
 RUN apt update
 
