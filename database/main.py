@@ -2,6 +2,14 @@ import psycopg2
 
 from database.config import get_db_params
 
+
+
+
+def clean_message(message: str) -> str:
+    """Очищает сообщзение от ненужных символов """
+
+    return ''.join(list(filter(lambda x: True if x in list('1234567890 qwertyuiopasdfghjklzxcvbnm йцукенгшщзхъфывапролджэячсмитьбю@') else False, message)))
+
 class Database:
 
 
@@ -22,6 +30,7 @@ class Database:
             print(f'Успешно подключен для работы с {modyl_name}')
             self.create_tables_if_they_do_not_exists()
             self.create_table_admins_if_not_exists()
+            self.create_table_answers_if_not_exists()
         except Exception as error:
             print(error)
 
@@ -56,6 +65,16 @@ class Database:
                                 admin_status varchar(10)
                             );
                             """)
+    
+    def create_table_answers_if_not_exists(self):
+        self.execute_query("""CREATE TABLE IF NOT EXISTS answers (
+                                id_question serial primary key,
+                                question text,
+                                answer text,
+                                button_text text,
+                                status varchar(20)
+                                );
+                                """)
     
 
 
@@ -149,7 +168,7 @@ class Database:
 
     def select_question_where_id(self, quest_id):
 
-        self.execute_query(f"""SELECT key_words, answer FROM questions 
+        self.execute_query(f"""SELECT key_words, answer, button_text FROM questions 
                            WHERE id_question='{quest_id}'""")
 
         return self.cur.fetchall()
@@ -184,20 +203,108 @@ class Database:
             return "Вы не можете записать в ключевые слова не строку"
 
         #удаляем все ненужные символы из ключевых слов 
-        clear_key_words = ''
-        for i in key_words:
-            if i in list('1234567890 йцукенгшщзщхъфывапролджэячсмитьбю'):
-                clear_key_words += i
+        clear_key_words = clean_message(key_words)
 
         #удаляем все ненужные символы из ответа
-        clear_answer = ''
-        for i in answer:
-            if i in list('1234567890 йцукенгшщзщхъфывапролджэячсмитьбю'):
-                clear_answer += i
+        clear_answer = clean_message(answer)
 
         self.execute_query(f"""INSERT INTO questions (key_words, answer) values ('{clear_key_words}', '{clear_answer}')""")
         return "Успешно"
 
 
 
+    # --------  Таблица с ответами и вопросами для сбора информации ---------------------------------------------------------
+
+
+    # def answers_insert_question_answer_status(self, question: str, answer: str, status: str) -> None:
+    #     """Добавляет новый вопрос в таблицу вопросы + ответы """
+
+    #     clear_answer, clear_question = clean_message(answer), clean_message(question)
+
+    #     self.execute_query(f"""INSERT INTO answers (question, answer, status) 
+    #                        values
+    #                        ('{clear_question}', '{clear_answer}', '{status}')""")
+    
+
+    def answers_insert_question(self, question: str) -> None:
+
+        """Добавляет вопрос в базу данных """
+
+        self.execute_query(f"""INSERT INTO answers (question)
+                           values
+                           ('{question}')""")
+    
+
+
+    def answers_update_answer_status_button_text(self, answer: str, status: str, id: int, button_text: str = None) -> None:
+
+        """ Обновляет вопрос добавляя в него ответ и статус """
+
+        if button_text is not None:
+            self.execute_query(f"""UPDATE answers
+                                        SET answer='{answer}',
+                                        status='{status}',
+                                        button_text='{button_text}'
+                                        WHERE id_question={id}""")
+        else:
+            self.execute_query(f"""UPDATE answers
+                                        SET answer='{answer}',
+                                        status='{status}'
+                                        WHERE id_question={id}""")
+    
+
+
+
+    def answers_select_id_for_the_question(self, question: str) -> int:
+
+        """ Дает id по вопросу """
+
+        self.execute_query(f"""SELECT id_question FROM answers
+                           WHERE question='{question}' 
+                           LIMIT 1""")
+
+        return self.cur.fetchall()[0][0]
+    
+
+
+    def answer_select_answer(self, id: int) -> str:
+
+        """Возваращает ответ на вопрос по id """
+
+        self.execute_query(f"""SELECT answer FROM answers
+                           WHERE id_question='{id}' 
+                           """)
         
+        return self.cur.fetchall()[0][0]
+
+
+
+
+    def answer_select_all(self, id: int) -> list:
+
+        """Возвращает все данные по id """
+
+        self.execute_query(f"""SELECT * FROM answers
+                           WHERE id_question='{id}' 
+                           """)
+        
+        return self.cur.fetchall()[0]
+
+    
+
+    def answers_update_status(self, status: str, id: int) -> None:
+
+        """ Обновляет статус по вопросу """
+
+        self.execute_query(f"""UPDATE answers
+                                    SET status='{status}'
+                                    WHERE id_question={id}""")
+    
+
+
+    def answers_delete(self, id: int) -> None:
+
+        """Удаляет вопрос и ответ по заданому id"""
+
+        self.execute_query(f"""DELETE FROM answers
+                           WHERE id_question={id}""")

@@ -14,7 +14,7 @@ db = Database('easy answer')
 class EasyQuestions:
 
     @staticmethod
-    def generate_easy_answer(text: str):
+    def generate_easy_answer(text: str, id_question: str = None):
 
         """
         Генерирует ответ на основе введеных ключевых слов 
@@ -49,10 +49,10 @@ class EasyQuestions:
 
                 if let > maxi:
                     result = {}
-                    result[f"{button_text}:-){id}"] = let
+                    result[f"{button_text}:-){id}_{id_question}"] = let
                     maxi = let
                 elif let >= maxi:
-                    result[f"{button_text}:-){id}"] = let
+                    result[f"{button_text}:-){id}_{id_question}"] = let
 
             
 
