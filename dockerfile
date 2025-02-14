@@ -31,8 +31,11 @@ WORKDIR /
 
 RUN apt update
 
+COPY database/. /database/
+COPY for_admin/. /for_admin/
+COPY keywords_questions/. /keywords_questions/
+
 COPY requirements.txt /requirements.txt
-COPY game_for_economists/. /game_for_economists/
 COPY keyboard_factory/. /keyboard_factory/
 COPY other/. /other/
 COPY config.ini /config.ini
