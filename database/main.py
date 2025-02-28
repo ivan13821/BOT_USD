@@ -5,32 +5,54 @@ from database.config import get_db_params
 
 
 
+
+
+
+def singleton(class_):
+    instances = {}
+    def getinstance(*args, **kwargs):
+        if class_ not in instances:
+            instances[class_] = class_(*args, **kwargs)
+        return instances[class_]
+    return getinstance
+ 
+@singleton
+
+
+
+
+
+
+
 def clean_message(message: str) -> str:
     """Очищает сообщзение от ненужных символов """
 
     return ''.join(list(filter(lambda x: True if x in list('1234567890 qwertyuiopasdfghjklzxcvbnm йцукенгшщзхъфывапролджэячсмитьбю@') else False, message)))
 
+
+@singleton
 class Database:
 
 
 
     # подключение и создание бд ------------------------------------------------------------------------------------------
-    def __init__(self, modyl_name):
+    def __init__(self):
         self.conn = None
         self.cur = None
-        self.connect_to_db(modyl_name)
+        self.connect_to_db()
 
-    def connect_to_db(self, modyl_name):
+    def connect_to_db(self):
         params = get_db_params()
         print('Подключаюсь к PostgreSQL...')
         try:
             self.conn = psycopg2.connect(**params)
             self.conn.autocommit = True
             self.cur = self.conn.cursor()
-            print(f'Успешно подключен для работы с {modyl_name}')
+            print(f'Успешно подключен!')
             self.create_tables_if_they_do_not_exists()
             self.create_table_admins_if_not_exists()
             self.create_table_answers_if_not_exists()
+            self.create_table_phone_and_user()
         except Exception as error:
             print(error)
 
@@ -75,6 +97,14 @@ class Database:
                                 status varchar(20)
                                 );
                                 """)
+    
+
+    def create_table_phone_and_user(self):
+        self.execute_query("""CREATE TABLE IF NOT EXISTS phone (
+                                id serial primary key,
+                                tg_chat_id bigint,
+                                phone bigint
+                                );""")
     
 
 
@@ -308,3 +338,32 @@ class Database:
 
         self.execute_query(f"""DELETE FROM answers
                            WHERE id_question={id}""")
+    
+
+
+
+
+
+
+    # ====================== Таблица с номерами телефонов пользователей ========================================
+
+
+
+    def has_number(self, chat_id) -> bool:
+
+        """ Проверяет есть ли номер телефона пользователя в базе. Возвращает bool"""
+
+        self.execute_query(f"""SELECT phone FROM phone
+                           WHERE tg_chat_id={chat_id}""")
+        
+        return self.cur.fetchall() == []
+    
+
+    def insert_phone(self, phone, chat_id) -> None:
+
+        """ Записывает номер телефона пользователя и его chat_id """
+
+        self.execute_query(f"""INSERT INTO phone 
+                                (tg_chat_id, phone)
+                                values
+                                ({chat_id}, {phone});""")
